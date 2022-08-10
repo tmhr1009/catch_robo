@@ -3,3 +3,16 @@
 した　can受け取る pid返す　起動時led緑
 
 １０ピン　setupでinputに
+
+
+
+can
+0x00 buf[0] 土台現在位置 now_dodai 上基盤から
+
+
+下基盤から
+0x01 buf[0] 土台 移動指示 v_mot0
+        [1] 上よこ 移動指示 v_mot1
+	[2] 上たて 移動指示 v_mot2
+	[3] 下よこ 移動指示 v_mot3
+	[4] 下たて 移動指示 v_mot4
