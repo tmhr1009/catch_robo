@@ -55,7 +55,6 @@ void setup() {
 void loop() {
   now_dodai = map(analogRead(A0), DODAI_MIN, DODAI_MAX, 0, 600);
 
-
   mot0.SetSpeed((int)abs(v_mot0), v_mot0 < 0);
   mot1.SetSpeed((int)abs(v_mot1), v_mot1 < 0);
   mot2.SetSpeed((int)abs(v_mot2), v_mot2 < 0);
@@ -82,5 +81,4 @@ void timerInt() {
       v_mot4 = rxmsg.buf[4];
     }
   }
-  FastLED.show();
 }
