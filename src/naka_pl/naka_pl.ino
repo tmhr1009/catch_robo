@@ -187,49 +187,35 @@ void loop() {
   ue_msg.buf[6] = up_yoko_sign; //上 よこ 符号
   shita_msg.buf[6] = shita_table_revo_sign; //下 テーブル回転 符号
 
-  if (!stop_flag) {
-    if ((data[5] & 0x30) >> 4 != 2) {
-      if ((data[5] & 0xC0) >> 6 == 1) {
-        Serial.println("Switch: 1");
-        mot2.SetSpeed(0, 0); //上 テーブル回転
-        shita_msg.buf[0] = 0; //下 テーブルよこ移動
-        shita_msg.buf[1] = 0; //下 テーブル回転
-        ue_msg.buf[0] = 0; //上 たて
-        ue_msg.buf[1] = 0; //上 よこ
-        mot0.SetSpeed(0, 0);
-        mot1.SetSpeed(0, 0);
-        ue_msg.buf[2] = up_vac; //上 吸盤
-      } else if ((data[5] & 0xC0) >> 6 == 3) {
-        Serial.println("Switch: 3");
-        mot2.SetSpeed(0, 0); //上 テーブル回転
-        shita_msg.buf[0] = 0; //下 テーブルよこ移動
-        shita_msg.buf[1] = 0; //下 テーブル回転
-        ue_msg.buf[0] = up_tate; //上 たて
-        ue_msg.buf[1] = up_yoko; //上 よこ
-        ue_msg.buf[2] = up_vac; //上 吸盤
-      } else if ((data[5] & 0xC0) >> 6 == 2) {
-        Serial.println("Switch: 2");
-        shita_msg.buf[0] = shita_table_yoko; //下 テーブルよこ移動
-        shita_msg.buf[1] = shita_table_revo; //下 テーブル回転
-        ue_msg.buf[0] = 0; //上 たて
-        ue_msg.buf[1] = 0; //上 よこ
-        mot0.SetSpeed(0, 0);
-        mot1.SetSpeed(0, 0);
-        ue_msg.buf[2] = up_vac; //上 吸盤
-      }
-    } else {
-      Serial.println("Switch: OFF");
+
+  if ((data[5] & 0x30) >> 4 != 2) {
+    if ((data[5] & 0xC0) >> 6 == 1) {
+      Serial.println("Switch: 1");
+      mot2.SetSpeed(0, 0); //上 テーブル回転
       shita_msg.buf[0] = 0; //下 テーブルよこ移動
       shita_msg.buf[1] = 0; //下 テーブル回転
       ue_msg.buf[0] = 0; //上 たて
       ue_msg.buf[1] = 0; //上 よこ
-      shita_tate = 0; //下 たて
-      shita_yoko = 0; //下 よこ
-      ue_msg.buf[2] = 0; //上 吸盤
-      shita_vac = 0;
       mot0.SetSpeed(0, 0);
       mot1.SetSpeed(0, 0);
-      mot2.SetSpeed(0, 0);
+      ue_msg.buf[2] = up_vac; //上 吸盤
+    } else if ((data[5] & 0xC0) >> 6 == 3) {
+      Serial.println("Switch: 3");
+      mot2.SetSpeed(0, 0); //上 テーブル回転
+      shita_msg.buf[0] = 0; //下 テーブルよこ移動
+      shita_msg.buf[1] = 0; //下 テーブル回転
+      ue_msg.buf[0] = up_tate; //上 たて
+      ue_msg.buf[1] = up_yoko; //上 よこ
+      ue_msg.buf[2] = up_vac; //上 吸盤
+    } else if ((data[5] & 0xC0) >> 6 == 2) {
+      Serial.println("Switch: 2");
+      shita_msg.buf[0] = shita_table_yoko; //下 テーブルよこ移動
+      shita_msg.buf[1] = shita_table_revo; //下 テーブル回転
+      ue_msg.buf[0] = 0; //上 たて
+      ue_msg.buf[1] = 0; //上 よこ
+      mot0.SetSpeed(0, 0);
+      mot1.SetSpeed(0, 0);
+      ue_msg.buf[2] = up_vac; //上 吸盤
     }
   } else {
     Serial.println("Switch: OFF");
