@@ -27,7 +27,8 @@ void loop() {
 
   pid0.now_value(en1);
   vx = pid0.pid_out(goal);
-
+  Serial.print(analogRead(A0));
+  Serial.print(", ");
   Serial.print(en1);
   Serial.print(",");
   Serial.println(goal);
