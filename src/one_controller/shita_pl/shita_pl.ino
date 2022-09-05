@@ -65,6 +65,9 @@ void loop() {
   if (shita_table_revo_sign == 1) {
     shita_table_revo = shita_table_revo * -1;
   }
+  if (shita_table_yoko_sign == 1) {
+    shita_table_yoko = shita_table_yoko * -1;
+  }
 
   now_shita_table = map(analogRead(A0), DODAI_MIN, DODAI_MAX, 0, 600);
   naka_msg.buf[0] = now_shita_table;
@@ -95,6 +98,7 @@ void timerInt() {
       shita_table_yoko = rxmsg.buf[0];
       shita_table_revo = rxmsg.buf[1];
       shita_led = rxmsg.buf[2];
+      shita_table_yoko_sign = rxmsg.buf[5];
       shita_table_revo_sign = rxmsg.buf[6];
     }
   }

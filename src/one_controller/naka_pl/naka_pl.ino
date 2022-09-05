@@ -42,6 +42,7 @@ int robot_state = 0; //0=通常, 9=非常停止
 int shita_table_revo_sign = 0; //0=プラス, 1=マイナス
 int up_tate_sign = 0;
 int up_yoko_sign = 0;
+int shita_table_yoko_sign = 0;
 int now_shita_table = 0; //下基盤からのテーブル位置 can値
 
 void setup() {
@@ -169,6 +170,13 @@ void loop() {
     shita_table_revo_sign = 0;
   }
 
+  if (shita_table_yoko < 0) {
+    shita_table_yoko = -1 * shita_table_yoko;
+    shita_table_yoko_sign = 1;
+  } else {
+    shita_table_yoko_sign = 0;
+  }
+
   if (up_tate < 0) {
     up_tate = -1 * up_tate;
     up_tate_sign = 1;
@@ -185,6 +193,7 @@ void loop() {
 
   ue_msg.buf[5] = up_tate_sign; //上 たて 符号
   ue_msg.buf[6] = up_yoko_sign; //上 よこ 符号
+  shita_msg.buf[5] = shita_table_yoko_sign; //下 テーブル移動 符号
   shita_msg.buf[6] = shita_table_revo_sign; //下 テーブル回転 符号
 
 
