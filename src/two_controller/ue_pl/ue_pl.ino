@@ -16,7 +16,8 @@ int up_vac = 0; //上 吸盤
 int up_table_revo = 0; //上 テーブル回転 can値
 int up_table_revo_sign = 0;
 int robot_stop = 0;
-int can_robot_stop = 0;
+int can_robot_stop = 0; //受信用
+int send_can_robot_stop = 0; //送信用
 
 static unsigned long testch[6];
 
@@ -94,15 +95,18 @@ void loop() {
 
   if ((data[5] & 0xC0) >> 6 == 2) {
     robot_stop = 1;
-    can_robot_stop = 1;
+    send_can_robot_stop = 1;
   } else if ((data[5] & 0xC0) >> 6 == 3) {
     robot_stop = 1;
-    can_robot_stop = 0;
+    send_can_robot_stop = 0;
   } else if ((data[5] & 0xC0) >> 6 == 1) {
     robot_stop = 0;
-    can_robot_stop = 0;
+    send_can_robot_stop = 0;
   }
-
+  uenaka_msg.buf[3] = send_can_robot_stop;
+//  Serial.print("can read stop ");
+//  Serial.println(send_can_robot_stop);
+  
   if ((data[5] & 0x30) >> 4 == 1) {
     up_vac = 1;
   } else if ((data[5] & 0x30) >> 4 == 2) {
@@ -115,7 +119,10 @@ void loop() {
     up_table_revo_sign = 0;
   }
 
+//  Serial.println(up_table_revo);
+
   if (can_robot_stop == 1 || robot_stop == 1) {
+    Serial.println("STOP");
     up_vac = 0;
     uenaka_msg.buf[0] = 0; //上 テーブル
     uenaka_msg.buf[5] = 0; //上 テーブル 符号
@@ -125,7 +132,7 @@ void loop() {
     uenaka_msg.buf[0] = up_table_revo; //上 テーブル
     uenaka_msg.buf[5] = up_table_revo_sign; //上 テーブル 符号
     mot0.SetSpeed((int)abs(up_tate), up_tate > 0);
-    mot1.SetSpeed((int)abs(up_yoko), up_yoko < 0);
+    mot1.SetSpeed((int)abs(up_yoko), up_yoko > 0);
   }
 
   if (up_vac == 1) {
@@ -144,7 +151,8 @@ void timerInt() {
   CANTransmitter.write(uenaka_msg);
   while ( CANTransmitter.read(rxmsg) ) {
     if (rxmsg.id == 0x03) {
-      can_robot_stop = rxmsg.buf[9];
+      can_robot_stop = rxmsg.buf[3];
+//      Serial.println(rxmsg.buf[3]);
     }
   }
 }

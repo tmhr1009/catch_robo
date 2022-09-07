@@ -35,7 +35,8 @@ int shita_table_yoko_sign = 0;
 int up_table_revo_sign = 0;
 int now_shita_table = 0; //下基盤からのテーブル位置 can値
 int robot_stop = 0;
-int can_robot_stop = 0;
+int can_robot_stop = 0; //受信用
+int send_can_robot_stop = 0; //送信用
 
 void setup() {
   CANTransmitter.begin();
@@ -111,25 +112,34 @@ void loop() {
     stop_flag = 1;
   }
 
-  pid0.now_value(now_shita_table);
+  //pid
+  //  pid0.now_value(now_shita_table);
+  //  shita_table_yoko_goal = shita_table_yoko_goal + map(testch[1], 364, 1684, -1, 1); //下 テーブルよこ移動
+  //  shita_table_yoko_goal = min(max(shita_table_yoko_goal, TABLE_MIN), TABLE_MAX);
+  //  shita_table_yoko = pid0.pid_out(shita_table_yoko_goal);
+
+  //通常コントローラー
+  shita_table_yoko = map(testch[1], 364, 1684, -100, 100); //下 テーブルよこ
   shita_tate = map(testch[3], 364, 1684, -100, 100); //下 たて
   shita_yoko = map(testch[2], 364, 1684, -255, 255); //下 よこ
-  shita_table_yoko_goal = shita_table_yoko_goal + map(testch[1], 364, 1684, -1, 1); //下 テーブルよこ移動
-  shita_table_revo = map(testch[0], 364, 1684, -100, 100); //下 テーブル回転
-  shita_table_yoko_goal = min(max(shita_table_yoko_goal, TABLE_MIN), TABLE_MAX);
-  shita_table_yoko = pid0.pid_out(shita_table_yoko_goal);
+  shita_table_revo = map(testch[0], 364, 1684, -200, 200); //下 テーブル回転
   shita_msg.buf[2] = shita_led; //下 LED
+
+//  Serial.println(up_table_revo);
 
   if ((data[5] & 0xC0) >> 6 == 2) {
     robot_stop = 1;
-    can_robot_stop = 1;
+    send_can_robot_stop = 1;
   } else if ((data[5] & 0xC0) >> 6 == 3) {
     robot_stop = 1;
-    can_robot_stop = 0;
+    send_can_robot_stop = 0;
   } else if ((data[5] & 0xC0) >> 6 == 1) {
     robot_stop = 0;
-    can_robot_stop = 0;
+    send_can_robot_stop = 0;
   }
+//  Serial.print(send_can_robot_stop);
+//  Serial.println("sendcan  lll");
+  ue_msg.buf[3] = send_can_robot_stop;
 
   if ((data[5] & 0x30) >> 4 == 1) {
     shita_vac = 1;
@@ -153,6 +163,7 @@ void loop() {
 
 
   if (can_robot_stop == 1 || robot_stop == 1) {
+    Serial.println("STOP");
     shita_vac = 0;
     shita_msg.buf[0] = 0; //下 テーブル移動
     shita_msg.buf[1] = 0; //下 テーブル回転
@@ -191,10 +202,12 @@ void timerInt() {
     if (rxmsg.id == 0x01) {
       now_shita_table = rxmsg.buf[0];
     }
-    if (rxmsg.id == 0x03) {
+    if (rxmsg.id == 0x06) {
       up_table_revo = rxmsg.buf[0];
       up_table_revo_sign = rxmsg.buf[5];
-      can_robot_stop = rxmsg.buf[9];
+      can_robot_stop = rxmsg.buf[3];
+//      Serial.print("can read robot ");
+//      Serial.println(rxmsg.buf[3]);
     }
   }
 }

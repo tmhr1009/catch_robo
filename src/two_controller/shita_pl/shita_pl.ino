@@ -72,7 +72,9 @@ void loop() {
   now_shita_table = map(analogRead(A0), DODAI_MIN, DODAI_MAX, 0, 600);
   naka_msg.buf[0] = now_shita_table;
 
-  Serial.println(shita_table_revo);
+  Serial.print(analogRead(A0));
+  Serial.print(", ");
+  Serial.println(now_shita_table);
   mot0.SetSpeed((int)abs(shita_table_revo), shita_table_revo < 0);
   mot1.SetSpeed((int)abs(shita_table_yoko), shita_table_yoko < 0);
 
