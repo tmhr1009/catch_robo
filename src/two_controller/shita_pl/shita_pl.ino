@@ -47,6 +47,7 @@ void setup() {
 }
 
 void loop() {
+  //CAN値でLED色変更
   switch (shita_led) {
     case 0:
       for (int i = 0; i < NUM_LEDS; i++)
@@ -62,6 +63,7 @@ void loop() {
       break;
   }
 
+  //CANで送る送られる値の符号変換
   if (shita_table_revo_sign == 1) {
     shita_table_revo = shita_table_revo * -1;
   }
@@ -69,15 +71,13 @@ void loop() {
     shita_table_yoko = shita_table_yoko * -1;
   }
 
+  //下テーブルのエンコーダ値をCANに流す
   now_shita_table = map(analogRead(A0), DODAI_MIN, DODAI_MAX, 0, 600);
   naka_msg.buf[0] = now_shita_table;
 
-  Serial.print(analogRead(A0));
-  Serial.print(", ");
-  Serial.println(now_shita_table);
+  //モーター動作指示
   mot0.SetSpeed((int)abs(shita_table_revo), shita_table_revo < 0);
   mot1.SetSpeed((int)abs(shita_table_yoko), shita_table_yoko < 0);
-
   mot0.Update();
   mot1.Update();
 
@@ -87,6 +87,7 @@ void loop() {
 void timerInt() {
   CANTransmitter.write(naka_msg);
   while ( CANTransmitter.read(rxmsg) ) {
+    //中基盤から
     if (rxmsg.id == 0x04) {
       shita_table_yoko = rxmsg.buf[0];
       shita_table_revo = rxmsg.buf[1];
@@ -95,5 +96,6 @@ void timerInt() {
       shita_table_revo_sign = rxmsg.buf[6];
     }
   }
+  //LED点灯指示
   FastLED.show();
 }

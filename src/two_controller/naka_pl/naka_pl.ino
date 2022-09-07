@@ -118,15 +118,16 @@ void loop() {
   //  shita_table_yoko_goal = min(max(shita_table_yoko_goal, TABLE_MIN), TABLE_MAX);
   //  shita_table_yoko = pid0.pid_out(shita_table_yoko_goal);
 
-  //通常コントローラー
+  //通常コントローラー値受信
   shita_table_yoko = map(testch[1], 364, 1684, -100, 100); //下 テーブルよこ
   shita_tate = map(testch[3], 364, 1684, -100, 100); //下 たて
   shita_yoko = map(testch[2], 364, 1684, -255, 255); //下 よこ
   shita_table_revo = map(testch[0], 364, 1684, -200, 200); //下 テーブル回転
   shita_msg.buf[2] = shita_led; //下 LED
 
-//  Serial.println(up_table_revo);
+  //  Serial.println(up_table_revo);
 
+  //動作許可
   if ((data[5] & 0xC0) >> 6 == 2) {
     robot_stop = 1;
     send_can_robot_stop = 1;
@@ -137,16 +138,16 @@ void loop() {
     robot_stop = 0;
     send_can_robot_stop = 0;
   }
-//  Serial.print(send_can_robot_stop);
-//  Serial.println("sendcan  lll");
   ue_msg.buf[3] = send_can_robot_stop;
 
+  //コントローラーからの吸盤操作
   if ((data[5] & 0x30) >> 4 == 1) {
     shita_vac = 1;
   } else if ((data[5] & 0x30) >> 4 == 2) {
     shita_vac = 0;
   }
 
+  //CANで送る送られる値の符号変換
   if (up_table_revo_sign == 1) up_table_revo = up_table_revo * -1;
   if (shita_table_revo < 0) {
     shita_table_revo = -1 * shita_table_revo;
@@ -161,8 +162,9 @@ void loop() {
     shita_table_yoko_sign = 0;
   }
 
-
-  if (can_robot_stop == 1 || robot_stop == 1) {
+  //主動作部分
+  //コントローラーからSTOP or CANからSTOP or コントローラー受信してないSTOP
+  if (can_robot_stop == 1 || robot_stop == 1 || stop_flag == 1) {
     Serial.println("STOP");
     shita_vac = 0;
     shita_msg.buf[0] = 0; //下 テーブル移動
@@ -172,7 +174,8 @@ void loop() {
     mot0.SetSpeed(0, 0);
     mot1.SetSpeed(0, 0);
     mot2.SetSpeed(0, 0);
-  } else if (can_robot_stop == 0 && robot_stop == 0) {
+  } //動作可能
+  else if (can_robot_stop == 0 && robot_stop == 0) {
     shita_msg.buf[0] = shita_table_yoko; //下 テーブル移動
     shita_msg.buf[1] = shita_table_revo; //下 テーブル回転
     shita_msg.buf[5] = shita_table_yoko_sign; //下 テーブル移動 符号
@@ -182,12 +185,14 @@ void loop() {
     mot2.SetSpeed((int)abs(up_table_revo), up_table_revo < 0);
   }
 
+  //吸盤動作
   if (shita_vac == 1) {
     vac_pick();
   } else if (shita_vac == 0) {
     vac_release();
   }
 
+  //モーター動作指示
   mot0.Update();
   mot1.Update();
   mot2.Update();
@@ -199,15 +204,15 @@ void timerInt() {
   CANTransmitter.write(ue_msg);
   CANTransmitter.write(shita_msg);
   while ( CANTransmitter.read(rxmsg) ) {
+    //下基盤から
     if (rxmsg.id == 0x01) {
       now_shita_table = rxmsg.buf[0];
     }
+    //上基盤から
     if (rxmsg.id == 0x06) {
       up_table_revo = rxmsg.buf[0];
       up_table_revo_sign = rxmsg.buf[5];
       can_robot_stop = rxmsg.buf[3];
-//      Serial.print("can read robot ");
-//      Serial.println(rxmsg.buf[3]);
     }
   }
 }
