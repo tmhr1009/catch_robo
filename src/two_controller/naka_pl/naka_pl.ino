@@ -37,6 +37,7 @@ int now_shita_table = 0; //下基盤からのテーブル位置 can値
 int robot_stop = 0;
 int can_robot_stop = 0; //受信用
 int send_can_robot_stop = 0; //送信用
+int read_flag = 0;
 
 void setup() {
   CANTransmitter.begin();
@@ -109,8 +110,12 @@ void loop() {
     stop_flag = 0;
   }
   else {
-    stop_flag = 1;
+    if (read_flag == 0) {
+      stop_flag = 1;
+      read_flag = 1;
+    }
   }
+  Serial.println(read_flag);
 
   //pid
   //  pid0.now_value(now_shita_table);
@@ -164,7 +169,8 @@ void loop() {
 
   //主動作部分
   //コントローラーからSTOP or CANからSTOP or コントローラー受信してないSTOP
-  if (can_robot_stop == 1 || robot_stop == 1 || stop_flag == 1) {
+  // || stop_flag == 1
+  if (can_robot_stop == 1 || robot_stop == 1) {
     Serial.println("STOP");
     shita_vac = 0;
     shita_msg.buf[0] = 0; //下 テーブル移動

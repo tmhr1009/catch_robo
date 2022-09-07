@@ -18,6 +18,7 @@ int up_table_revo_sign = 0;
 int robot_stop = 0;
 int can_robot_stop = 0; //受信用
 int send_can_robot_stop = 0; //送信用
+int read_flag = 0;
 
 static unsigned long testch[6];
 
@@ -86,7 +87,10 @@ void loop() {
     stop_flag = 0;
   }
   else {
-    stop_flag = 1;
+    if (read_flag == 0) {
+      stop_flag = 1;
+      read_flag = 1;
+    }
   }
 
   //コントローラー値受信
@@ -94,7 +98,7 @@ void loop() {
   up_yoko = map(testch[2], 364, 1684, -255, 255); //上 よこ
   up_table_revo = map(testch[0], 364, 1684, -100, 100); //上 テーブル回転
 
-//動作許可
+  //動作許可
   if ((data[5] & 0xC0) >> 6 == 2) {
     robot_stop = 1;
     send_can_robot_stop = 1;
@@ -107,7 +111,7 @@ void loop() {
   }
   uenaka_msg.buf[3] = send_can_robot_stop;
 
-//コントローラーからの吸盤操作
+  //コントローラーからの吸盤操作
   if ((data[5] & 0x30) >> 4 == 1) {
     up_vac = 1;
   } else if ((data[5] & 0x30) >> 4 == 2) {
@@ -120,33 +124,34 @@ void loop() {
     up_table_revo_sign = 0;
   }
 
-//主動作部分
+  //主動作部分
   //コントローラーからSTOP or CANからSTOP or コントローラー受信してないSTOP
-  if (can_robot_stop == 1 || robot_stop == 1 || stop_flag == 1) {
+  // || stop_flag == 1
+  if (can_robot_stop == 1 || robot_stop == 1) {
     Serial.println("STOP");
     up_vac = 0;
     uenaka_msg.buf[0] = 0; //上 テーブル
     uenaka_msg.buf[5] = 0; //上 テーブル 符号
     mot0.SetSpeed(0, 0);
     mot1.SetSpeed(0, 0);
-  } //動作可能 
+  } //動作可能
   else if (can_robot_stop == 0 && robot_stop == 0) {
     uenaka_msg.buf[0] = up_table_revo; //上 テーブル
     uenaka_msg.buf[5] = up_table_revo_sign; //上 テーブル 符号
     mot0.SetSpeed((int)abs(up_tate), up_tate > 0);
     mot1.SetSpeed((int)abs(up_yoko), up_yoko > 0);
   }
-  
-//吸盤動作
+
+  //吸盤動作
   if (up_vac == 1) {
     vac_pick();
   } else if (up_vac == 0) {
     vac_release();
   }
 
-//モーター動作指示
+  //モーター動作指示
   mot0.Update();
-mot1.Update();
+  mot1.Update();
 
   delay(5);
 }
