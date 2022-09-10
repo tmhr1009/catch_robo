@@ -12,6 +12,8 @@ void setup() {
 }
 
 static unsigned long testch[6];
+int savepoint = 0;
+int savepoint2 = 0;
 
 void loop() {
   static int data[18];
@@ -58,6 +60,22 @@ void loop() {
   }
   else {
     digitalWrite(13, LOW);
+    testch[1] = 1024; //下 テーブルよこ
+    testch[0] = 1024; //下 テーブル回転
+  }
+  testch[1] = map(testch[1], 364, 1684, 0, 200); //下 テーブルよこ
+  testch[0] = map(testch[0], 364, 1684, 0, 200); //下 テーブル回転
+
+  if (testch[1] > 200) {
+    testch[1] = savepoint;
+  } else {
+    savepoint = testch[1];
+  }
+
+  if (testch[0] > 200) {
+    testch[0] = savepoint2;
+  } else {
+    savepoint2 = testch[0];
   }
 
   Serial.print(testch[0]);
@@ -67,9 +85,11 @@ void loop() {
   Serial.println((data[5] & 0x30) >> 4);
   Serial.print("joyRightX : ");
   Serial.print(testch[0]);
+  if (testch[0] == 100)Serial.print("     100");
   Serial.println(",");
   Serial.print("joyRightY : ");
   Serial.print(testch[1]);
+  if (testch[1] == 100)Serial.print("     100");
   Serial.println(",");
   Serial.print("joyLeftX : ");
   Serial.print(testch[2]);
@@ -83,5 +103,5 @@ void loop() {
   Serial.print("toggleR : ");
   Serial.println((data[5] & 0x30) >> 4);
   Serial.println();
-  delay(5);
+  delay(10);
 }

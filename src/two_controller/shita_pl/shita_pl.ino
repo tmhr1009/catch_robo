@@ -24,6 +24,8 @@ int shita_table_yoko_sign = 0;
 int shita_table_revo = 0; //下 テーブル回転 can値
 int shita_table_revo_sign = 0; //0=プラス, 1=マイナス can値
 int shita_led = 0; //下 LED色 can値
+int can_robot_stop = 0; //受信用
+int can_robot_stop_8 = 0;
 
 void setup() {
   CANTransmitter.begin();
@@ -64,24 +66,32 @@ void loop() {
   }
 
   //CANで送る送られる値の符号変換
-  if (shita_table_revo_sign == 1) {
-    shita_table_revo = shita_table_revo * -1;
-  }
-  if (shita_table_yoko_sign == 1) {
-    shita_table_yoko = shita_table_yoko * -1;
-  }
+  //  if (shita_table_revo_sign == 1) shita_table_revo = shita_table_revo * -1;
+  //  if (shita_table_yoko_sign == 1) shita_table_yoko = shita_table_yoko * -1;
+
 
   //下テーブルのエンコーダ値をCANに流す
   now_shita_table = map(analogRead(A0), DODAI_MIN, DODAI_MAX, 0, 600);
   naka_msg.buf[0] = now_shita_table;
 
+  Serial.print("shita_table_revo : ");
+  Serial.println(shita_table_revo);
+  Serial.print("shita_table_yoko : ");
+  Serial.println(shita_table_yoko);
+  Serial.println();
+
   //モーター動作指示
-  mot0.SetSpeed((int)abs(shita_table_revo), shita_table_revo < 0);
-  mot1.SetSpeed((int)abs(shita_table_yoko), shita_table_yoko < 0);
+  if (can_robot_stop == 1 || can_robot_stop_8 == 1) {
+    mot0.SetSpeed(0, 0);
+    mot1.SetSpeed(0, 0);
+  } else if (can_robot_stop == 0 && can_robot_stop_8 == 0) {
+    mot0.SetSpeed((int)abs(shita_table_revo), shita_table_revo < 0);
+    mot1.SetSpeed((int)abs(shita_table_yoko), shita_table_yoko < 0);
+  }
   mot0.Update();
   mot1.Update();
 
-  delay(5);
+  delay(10);
 }
 
 void timerInt() {
@@ -91,9 +101,20 @@ void timerInt() {
     if (rxmsg.id == 0x04) {
       shita_table_yoko = rxmsg.buf[0];
       shita_table_revo = rxmsg.buf[1];
+      shita_table_yoko = map(shita_table_yoko, 0, 200, -150, 150);
+      shita_table_revo = map(shita_table_revo, 0, 200, -200, 200);
       shita_led = rxmsg.buf[2];
+      can_robot_stop = rxmsg.buf[3];
       shita_table_yoko_sign = rxmsg.buf[5];
       shita_table_revo_sign = rxmsg.buf[6];
+      //      Serial.print("shita_table_revo : ");
+      //      Serial.println(shita_table_revo);
+      //      Serial.print("shita_table_yoko : ");
+      //      Serial.println(shita_table_yoko);
+      //      Serial.println();
+    }
+    if (rxmsg.id == 0x08) {
+      can_robot_stop_8 = rxmsg.buf[3];
     }
   }
   //LED点灯指示

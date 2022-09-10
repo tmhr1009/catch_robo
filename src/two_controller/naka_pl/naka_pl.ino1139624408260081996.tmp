@@ -110,8 +110,8 @@ void loop() {
     stop_flag = 1;
     mot0.SetSpeed(0, 0);
     mot1.SetSpeed(0, 0);
-    shita_msg.buf[0] = 100; //下 テーブル移動
-    shita_msg.buf[1] = 100; //下 テーブル回転
+    shita_msg.buf[0] = 1024; //下 テーブル移動
+    shita_msg.buf[1] = 1024; //下 テーブル回転
   }
 
   //pid
@@ -207,7 +207,6 @@ void loop() {
   Serial.println(shita_table_revo);
   Serial.print("shita_table_yoko   ");
   Serial.println(shita_table_yoko);
-  
   //吸盤動作
   if (shita_vac == 1) {
     vac_pick();
