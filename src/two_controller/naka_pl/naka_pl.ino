@@ -203,11 +203,11 @@ void loop() {
       mot1.SetSpeed((int)abs(shita_yoko), shita_yoko < 0);
     }
   }
-  Serial.print("shita_table_revo   ");
-  Serial.println(shita_table_revo);
-  Serial.print("shita_table_yoko   ");
-  Serial.println(shita_table_yoko);
-  
+//  Serial.print("shita_table_revo   ");
+//  Serial.println(shita_table_revo);
+//  Serial.print("shita_table_yoko   ");
+//  Serial.println(shita_table_yoko);
+
   //吸盤動作
   if (shita_vac == 1) {
     vac_pick();
