@@ -101,7 +101,7 @@ void timerInt() {
     if (rxmsg.id == 0x04) {
       shita_table_yoko = rxmsg.buf[0];
       shita_table_revo = rxmsg.buf[1];
-      shita_table_yoko = map(shita_table_yoko, 0, 200, -150, 150);
+      shita_table_yoko = map(shita_table_yoko, 0, 200, -100, 100);
       shita_table_revo = map(shita_table_revo, 0, 200, -200, 200);
       shita_led = rxmsg.buf[2];
       can_robot_stop = rxmsg.buf[3];

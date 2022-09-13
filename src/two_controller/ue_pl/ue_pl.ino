@@ -51,7 +51,7 @@ void setup() {
   pinMode(16, OUTPUT); //電磁弁
   pinMode(17, OUTPUT); //真空モータ
   pinMode(10, OUTPUT);
-  pid0.init(6, 0.0001, 0.001);
+  pid0.init(6.5, 0, 0.001);
   mot0.init(20, 10);
   pinMode(9, OUTPUT);
   mot1.init(21, 9);
@@ -169,7 +169,8 @@ void loop() {
   //コントローラーからSTOP or CANからSTOP or コントローラー受信してないSTOP
   if (stop_flag != 1) {
     if (can_robot_stop == 1 || robot_stop == 1) {
-      //    Serial.println("STOP");
+      Serial.println("STOP");
+      gyro_goal = gyro_x;
       up_vac = 0;
       mot0.SetSpeed(0, 0);
       mot1.SetSpeed(0, 0);
@@ -189,7 +190,6 @@ void loop() {
         up_table_revo = pid0.pid_out(gyro_goal);
       }
 
-      //      up_table_revo = pid0.pid_out(gyro_goal);
       up_table_revo = min(max(up_table_revo, -100), 100);
       mot0.SetSpeed((int)abs(up_tate), up_tate > 0);
       mot1.SetSpeed((int)abs(up_yoko), up_yoko > 0);
@@ -224,6 +224,8 @@ void timerInt() {
     //中基盤から
     if (rxmsg.id == 0x03) {
       can_robot_stop = rxmsg.buf[3];
+      Serial.print("CAN  ");
+      Serial.println(rxmsg.buf[3]);
     }
   }
 }
