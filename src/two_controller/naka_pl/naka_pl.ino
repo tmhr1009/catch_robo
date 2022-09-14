@@ -114,7 +114,7 @@ void loop() {
     shita_msg.buf[1] = 100; //下 テーブル回転
   }
 
-  //pid
+  //下テーブルpid
   //  pid0.now_value(now_shita_table);
   //  shita_table_yoko_goal = shita_table_yoko_goal + map(testch[1], 364, 1684, -1, 1); //下 テーブルよこ移動
   //  shita_table_yoko_goal = min(max(shita_table_yoko_goal, TABLE_MIN), TABLE_MAX);
@@ -129,16 +129,20 @@ void loop() {
   shita_table_yoko = map(shita_table_yoko, 364, 1684, 0, 200); //下 テーブルよこ
   shita_table_revo = map(shita_table_revo, 364, 1684, 0, 200); //下 テーブル回転
 
-  if (shita_table_yoko > 200) {
-    shita_table_yoko = savepoint;
-  } else {
-    savepoint = shita_table_yoko;
-  }
+  //コントローラー受信がバグったときの処理
+  //値が大きくなり過ぎたら前の値に置き換え
+  if (shita_table_yoko > 200) shita_table_yoko = savepoint;
+  else savepoint = shita_table_yoko;
 
-  if (shita_table_revo > 200) {
-    shita_table_revo = savepoint2;
-  } else {
-    savepoint2 = shita_table_revo;
+  if (shita_table_revo > 200) shita_table_revo = savepoint2;
+  else savepoint2 = shita_table_revo;
+
+  //少し倒しただけでは横移動しないように
+  //100が真ん中(0~200)で0になる
+  if (shita_table_yoko < 100 && shita_table_yoko > 90) {
+    shita_table_yoko = 100;
+  } else if (shita_table_yoko > 100 && shita_table_yoko < 110) {
+    shita_table_yoko = 100;
   }
 
   //  Serial.println(up_table_revo);
@@ -203,10 +207,10 @@ void loop() {
       mot1.SetSpeed((int)abs(shita_yoko), shita_yoko < 0);
     }
   }
-//  Serial.print("shita_table_revo   ");
-//  Serial.println(shita_table_revo);
-//  Serial.print("shita_table_yoko   ");
-//  Serial.println(shita_table_yoko);
+  //  Serial.print("shita_table_revo   ");
+  //  Serial.println(shita_table_revo);
+  //  Serial.print("shita_table_yoko   ");
+  //  Serial.println(shita_table_yoko);
 
   //吸盤動作
   if (shita_vac == 1) {
