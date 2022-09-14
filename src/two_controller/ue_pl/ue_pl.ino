@@ -23,7 +23,7 @@ Pid pid0; //上 テーブル回転
 int up_tate = 0; //上 たて
 int up_yoko = 0; //上 よこ
 int up_vac = 0; //上 吸盤
-int up_table_revo = 0; //上 テーブル回転 can値
+float up_table_revo = 0; //上 テーブル回転 can値
 int robot_stop = 0;
 int can_robot_stop = 0; //受信用
 int send_can_robot_stop = 0; //送信用
@@ -51,6 +51,7 @@ void setup() {
   pinMode(16, OUTPUT); //電磁弁
   pinMode(17, OUTPUT); //真空モータ
   pinMode(10, OUTPUT);
+//  pid0.init(6, 0.0001, 0.001);
   pid0.init(6.5, 0, 0.001);
   mot0.init(20, 10);
   pinMode(9, OUTPUT);
@@ -128,6 +129,7 @@ void loop() {
   up_tate = map(testch[3], 364, 1684, -100, 100); //上 たて
   up_yoko = map(testch[2], 364, 1684, -255, 255); //上 よこ
   up_table_revo = map(testch[0], 364, 1684, -1, 1); //上 テーブル回転
+//  up_table_revo = (float(testch[0])-1024)/100;
   if (up_table_revo == 1 || up_table_revo == -1) {
     if (timers > 1) {
       timers = 0;
@@ -169,8 +171,7 @@ void loop() {
   //コントローラーからSTOP or CANからSTOP or コントローラー受信してないSTOP
   if (stop_flag != 1) {
     if (can_robot_stop == 1 || robot_stop == 1) {
-      Serial.println("STOP");
-      gyro_goal = gyro_x;
+      //    Serial.println("STOP");
       up_vac = 0;
       mot0.SetSpeed(0, 0);
       mot1.SetSpeed(0, 0);
@@ -190,6 +191,7 @@ void loop() {
         up_table_revo = pid0.pid_out(gyro_goal);
       }
 
+      //      up_table_revo = pid0.pid_out(gyro_goal);
       up_table_revo = min(max(up_table_revo, -100), 100);
       mot0.SetSpeed((int)abs(up_tate), up_tate > 0);
       mot1.SetSpeed((int)abs(up_yoko), up_yoko > 0);
@@ -224,8 +226,6 @@ void timerInt() {
     //中基盤から
     if (rxmsg.id == 0x03) {
       can_robot_stop = rxmsg.buf[3];
-      Serial.print("CAN  ");
-      Serial.println(rxmsg.buf[3]);
     }
   }
 }
