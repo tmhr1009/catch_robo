@@ -139,9 +139,9 @@ void loop() {
 
   //少し倒しただけでは横移動しないように
   //100が真ん中(0~200)で0になる
-  if (shita_table_yoko < 100 && shita_table_yoko > 90) {
+  if (shita_table_yoko < 100 && shita_table_yoko > 60) {
     shita_table_yoko = 100;
-  } else if (shita_table_yoko > 100 && shita_table_yoko < 110) {
+  } else if (shita_table_yoko > 100 && shita_table_yoko < 140) {
     shita_table_yoko = 100;
   }
 
