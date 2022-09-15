@@ -101,17 +101,12 @@ void timerInt() {
     if (rxmsg.id == 0x04) {
       shita_table_yoko = rxmsg.buf[0];
       shita_table_revo = rxmsg.buf[1];
-      shita_table_yoko = map(shita_table_yoko, 0, 200, -100, 100);
+      shita_table_yoko = map(shita_table_yoko, 0, 200, -80, 80);
       shita_table_revo = map(shita_table_revo, 0, 200, -200, 200);
       shita_led = rxmsg.buf[2];
       can_robot_stop = rxmsg.buf[3];
       shita_table_yoko_sign = rxmsg.buf[5];
       shita_table_revo_sign = rxmsg.buf[6];
-      //      Serial.print("shita_table_revo : ");
-      //      Serial.println(shita_table_revo);
-      //      Serial.print("shita_table_yoko : ");
-      //      Serial.println(shita_table_yoko);
-      //      Serial.println();
     }
     if (rxmsg.id == 0x08) {
       can_robot_stop_8 = rxmsg.buf[3];
